@@ -69,6 +69,17 @@ const logger = pino({
   useLevelLabels: true
 });
 
+// include and initialize the rollbar library with your access token
+const Rollbar = require("rollbar");
+const rollbar = new Rollbar({
+  enabled: false,
+  accessToken: 'YOURCLIENTACCESSTOKEN',
+  captureUncaught: true,
+  captureUnhandledRejections: true
+});
+
+// logger = rollbar;
+
 /**
  * Helper function that loads a protobuf file.
  */
@@ -148,6 +159,7 @@ function convert (call, callback) {
       callback(null, result);
     });
   } catch (err) {
+    rollbar.error(err);
     logger.error(`conversion request failed: ${err}`);
     callback(err.message);
   }

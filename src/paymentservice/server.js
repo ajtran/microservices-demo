@@ -14,17 +14,28 @@
 
 const path = require('path');
 const grpc = require('grpc');
-const pino = require('pino');
+// const pino = require('pino');
 const protoLoader = require('@grpc/proto-loader');
 
 const charge = require('./charge');
 
-const logger = pino({
-  name: 'paymentservice-server',
-  messageKey: 'message',
-  changeLevelName: 'severity',
-  useLevelLabels: true
+// const logger = pino({
+//   name: 'paymentservice-server',
+//   messageKey: 'message',
+//   changeLevelName: 'severity',
+//   useLevelLabels: true
+// });
+
+// include and initialize the rollbar library with your access token
+const Rollbar = require("rollbar");
+const rollbar = new Rollbar({
+  enabled: false,
+  accessToken: 'YOURCLIENTACCESSTOKEN',
+  captureUncaught: true,
+  captureUnhandledRejections: true
 });
+
+const logger = rollbar;
 
 class HipsterShopServer {
   constructor (protoRoot, port = HipsterShopServer.PORT) {
@@ -50,6 +61,7 @@ class HipsterShopServer {
       const response = charge(call.request);
       callback(null, response);
     } catch (err) {
+      rollbar.warning(err);
       console.warn(err);
       callback(err);
     }
